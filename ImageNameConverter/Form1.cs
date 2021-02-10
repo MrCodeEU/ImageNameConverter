@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using MetadataExtractor;
+using MetadataExtractor.Formats.Exif;
+using MetadataExtractor.Formats.QuickTime;
 
 namespace ImageNameConverter
 {
@@ -54,8 +58,6 @@ namespace ImageNameConverter
 
                 //Generate new File Names and show them in listbox
                 lstNew.Items.AddRange(Umbennen(files));
-
-
             }
         }
 
@@ -124,30 +126,22 @@ namespace ImageNameConverter
                 
                 if (!Dateien[i].Contains("Screenshot"))
                 {
-                    if (!Dateien[i].Contains("HEIC") && !Dateien[i].Contains("heic") && !Dateien[i].Contains("MOV") && !Dateien[i].Contains("mov"))
+
+                    Dispose();
+
+                    if (Dateien[i].ToLower().Contains("mov"))
                     {
-                        FileStream fs = new FileStream(Dateien[i], FileMode.Open, FileAccess.Read);
-                        Image myImage = Image.FromStream(fs, false, false);
-
-                        PropertyItem propItem = myImage.PropertyItems[0];
-
-                        try
+                        var directories = QuickTimeMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
+                        // obtain the Exif SubIFD directory
+                        var directory = directories.OfType<QuickTimeMetadataHeaderDirectory>().FirstOrDefault();
+                        // query the tag's value
+                        if (directory.TryGetDateTime(QuickTimeMetadataHeaderDirectory.TagCreationDate, out var dateTime))
                         {
-                            propItem = myImage.GetPropertyItem(36867);
-                        }
-                        catch (Exception)
-                        {
-                            propItem = null;
-                        }
 
-                        myImage.Dispose();
-
-                        if (propItem != null)
-                        {
-                            string dateTaken = r.Replace(Encoding.UTF8.GetString(propItem.Value), "-", 2);
+                            //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
 
                             //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
-                            newDateien[i] = filePath + DateTime.Parse(dateTaken).ToString("s").Replace("-", "_").Replace("T", " ").Replace(":", "-") + "." + Dateien[i].Split('.')[1];
+                            newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
                         }
                         else
                         {
@@ -157,8 +151,23 @@ namespace ImageNameConverter
                     }
                     else
                     {
-                        //HEIC und MOV Dateien umbennen herausfinden
-                        newDateien[i] = Dateien[i];
+                        var directories = ImageMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
+                        // obtain the Exif SubIFD directory
+                        var directory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+                        // query the tag's value
+                        if (directory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
+                        {
+
+                            //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
+
+                            //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
+                            newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
+                        }
+                        else
+                        {
+                            //Kann Datei nicht umbennen, da sie kein Aufnahmnedatum in EXIF gespeichert hat
+                            newDateien[i] = Dateien[i];
+                        }
                     }
                 }
                 else
@@ -170,10 +179,6 @@ namespace ImageNameConverter
 
             return newDateien;
         }
-
-        //we init this once so that if the function is repeatedly called
-        //it isn't stressing the garbage man
-        private static readonly Regex r = new Regex(":");
 
         private void LstNew_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -188,16 +193,22 @@ namespace ImageNameConverter
 
             picSelected.Image.Dispose();
 
-            Dispose();
+            if (System.IO.Directory.Exists(filePath + "umbennant\\"))
+            {
+                System.IO.Directory.Delete(filePath + "umbennant\\", true);
+            }
+
+            System.IO.Directory.CreateDirectory(filePath + "umbennant\\");
 
             // Dateien umbennen
             if (result == DialogResult.Yes)
             {
                 for (int i = 0; i < files.Length; i++)
                 {
-                    File.Move(files[i], (string)lstNew.Items[i]);
+                    File.Copy(files[i], (string)lstNew.Items[i]);
                 }
             }
+
         }
     }
 }
