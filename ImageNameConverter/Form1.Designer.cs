@@ -36,6 +36,8 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.picSelected = new System.Windows.Forms.PictureBox();
+            this.PrbUmbennen = new System.Windows.Forms.ProgressBar();
+            this.LblProgress = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picSelected)).BeginInit();
             this.SuspendLayout();
             // 
@@ -61,7 +63,7 @@
             // btnRename
             // 
             this.btnRename.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRename.Location = new System.Drawing.Point(641, 327);
+            this.btnRename.Location = new System.Drawing.Point(641, 298);
             this.btnRename.Name = "btnRename";
             this.btnRename.Size = new System.Drawing.Size(75, 23);
             this.btnRename.TabIndex = 2;
@@ -105,21 +107,42 @@
             this.picSelected.TabIndex = 5;
             this.picSelected.TabStop = false;
             // 
+            // PrbUmbennen
+            // 
+            this.PrbUmbennen.Location = new System.Drawing.Point(508, 327);
+            this.PrbUmbennen.Name = "PrbUmbennen";
+            this.PrbUmbennen.Size = new System.Drawing.Size(208, 23);
+            this.PrbUmbennen.TabIndex = 6;
+            // 
+            // LblProgress
+            // 
+            this.LblProgress.AutoSize = true;
+            this.LblProgress.Location = new System.Drawing.Point(508, 303);
+            this.LblProgress.Name = "LblProgress";
+            this.LblProgress.Size = new System.Drawing.Size(53, 13);
+            this.LblProgress.TabIndex = 7;
+            this.LblProgress.Text = "Fortschritt";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(728, 362);
+            this.Controls.Add(this.LblProgress);
+            this.Controls.Add(this.PrbUmbennen);
             this.Controls.Add(this.picSelected);
             this.Controls.Add(this.lstNew);
             this.Controls.Add(this.lstOld);
             this.Controls.Add(this.btnRename);
             this.Controls.Add(this.btnOpenFolder);
             this.Controls.Add(this.btnOpenFile);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Bilddateienname Umwandler by MrCode";
             ((System.ComponentModel.ISupportInitialize)(this.picSelected)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -133,6 +156,8 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
         private System.Windows.Forms.PictureBox picSelected;
+        private System.Windows.Forms.ProgressBar PrbUmbennen;
+        private System.Windows.Forms.Label LblProgress;
     }
 }
 

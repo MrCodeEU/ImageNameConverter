@@ -58,6 +58,9 @@ namespace ImageNameConverter
 
                 //Generate new File Names and show them in listbox
                 lstNew.Items.AddRange(Umbennen(files));
+
+                //Progressbar size setzen
+                PrbUmbennen.Maximum = files.Length;
             }
         }
 
@@ -126,9 +129,6 @@ namespace ImageNameConverter
                 
                 if (!Dateien[i].Contains("Screenshot"))
                 {
-
-                    Dispose();
-
                     if (Dateien[i].ToLower().Contains("mov"))
                     {
                         var directories = QuickTimeMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
@@ -146,7 +146,7 @@ namespace ImageNameConverter
                         else
                         {
                             //Kann Datei nicht umbennen, da sie kein Aufnahmnedatum in EXIF gespeichert hat
-                            newDateien[i] = Dateien[i];
+                            newDateien[i] = Dateien[i].Insert(Dateien[i].LastIndexOf('\\'), "\\umbennant");
                         }
                     }
                     else
@@ -166,14 +166,14 @@ namespace ImageNameConverter
                         else
                         {
                             //Kann Datei nicht umbennen, da sie kein Aufnahmnedatum in EXIF gespeichert hat
-                            newDateien[i] = Dateien[i];
+                            newDateien[i] = Dateien[i].Insert(Dateien[i].LastIndexOf('\\'), "\\umbennant");
                         }
                     }
                 }
                 else
                 {
                     //Screenshot umbennen
-                    newDateien[i] = Dateien[i];
+                    newDateien[i] = Dateien[i].Insert(Dateien[i].LastIndexOf('\\'),"\\umbennant");
                 }
             }
 
@@ -203,9 +203,25 @@ namespace ImageNameConverter
             // Dateien umbennen
             if (result == DialogResult.Yes)
             {
-                for (int i = 0; i < files.Length; i++)
+                try
                 {
-                    File.Copy(files[i], (string)lstNew.Items[i]);
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        File.Copy(files[i], (string)lstNew.Items[i]);
+                        PrbUmbennen.Value++;
+                    }
+
+                    const string messageDone = "Alle Dateien wurden umbennant. \n Die Dateien befinden sich in einem neuen Unterordner mit dem Namen \"umbennant\".";
+                    const string captionDone = "Dateien umbennen erfolgreich";
+                    MessageBox.Show(messageDone, captionDone, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    //Clear everything
+
+                }
+                catch (Exception)
+                {
+                    const string messageDone = "Unbekannter Fehler ist aufgetretten!!";
+                    const string captionDone = "Help!?!";
+                    MessageBox.Show(messageDone, captionDone, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 }
             }
 
