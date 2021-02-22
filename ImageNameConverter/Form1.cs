@@ -9,13 +9,14 @@ using System.Windows.Forms;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using MetadataExtractor.Formats.QuickTime;
+using MetadataExtractor.Util;
 
 namespace ImageNameConverter
 {
     public partial class Form1 : Form
     {
         string filePath = string.Empty;
-        string[] files = new string[1];
+        List<string> files = new List<string>();
 
         public Form1()
         {
@@ -38,8 +39,7 @@ namespace ImageNameConverter
 
                 //Get the path of specified file
                 filePath = openFileDialog.FileNames[0].Replace(openFileDialog.SafeFileNames[0], "");
-                Array.Resize<string>(ref files, openFileDialog.FileNames.Length);
-                files = openFileDialog.FileNames;
+                files = openFileDialog.FileNames.ToList<string>();
 
                 //Set selected Image as Image of PictureBox
                 try
@@ -54,13 +54,13 @@ namespace ImageNameConverter
                 lstNew.SelectedIndex = lstOld.SelectedIndex;
 
                 //Shpow filepaths in listbox
-                lstOld.Items.AddRange(files);
+                lstOld.Items.AddRange(files.ToArray());
 
                 //Generate new File Names and show them in listbox
-                lstNew.Items.AddRange(Umbennen(files));
+                lstNew.Items.AddRange(Umbennen(files).ToArray());
 
                 //Progressbar size setzen
-                PrbUmbennen.Maximum = files.Length;
+                PrbUmbennen.Maximum = files.Count;
             }
         }
 
@@ -120,13 +120,37 @@ namespace ImageNameConverter
             lstNew.SelectedIndex = lstOld.SelectedIndex;
         }
 
-        private string[] Umbennen(string[] Dateien)
+        private List<string> Umbennen(List<string> Dateien)
         {
-            string[] newDateien = new string[Dateien.Length];
+            List<string> newDateien = new List<string>();
 
-            for (int i = 0; i < Dateien.Length; i++)
+            for (int i = 0; i < Dateien.Count; i++)
             {
-                
+                FileType filetype = FileTypeDetector.DetectFileType("__Stream___!!!!");
+                switch (filetype)
+                {
+                    case FileType.Bmp:
+                    case FileType.Heif:
+                    case FileType.Jpeg:
+                    case FileType.Nef:
+                    case FileType.Png:
+
+                        break;
+
+                    case FileType.QuickTime:
+
+                        break;
+
+                    default:
+                        string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateiendung wurde nicht erkannt oder ist nicht unterstützt!\nDatei wird übersprungen";
+                        string captionDone = "Unbekannter Dateifehler!";
+                        MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        newDateien.RemoveAt(i);
+                        break;
+                }
+
+
+
                 if (!Dateien[i].Contains("Screenshot"))
                 {
                     if (Dateien[i].ToLower().Contains("mov"))
@@ -153,7 +177,19 @@ namespace ImageNameConverter
                     {
                         var directories = ImageMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
                         // obtain the Exif SubIFD directory
-                        var directory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+                        var directory = new ExifSubIfdDirectory();
+                        try
+                        {
+                            directory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+                        }
+                        catch (Exception)
+                        {
+                            string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Diese Datei wird übersprungen!";
+                            string captionDone = "Unbekannter Dateifehler!";
+                            MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            newDateien.RemoveAt(i);
+                            break;
+                        }
                         // query the tag's value
                         if (directory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
                         {
@@ -161,7 +197,7 @@ namespace ImageNameConverter
                             //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
 
                             //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
-                            newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
+                            newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + "PLATZHALTER";
                         }
                         else
                         {
@@ -172,8 +208,11 @@ namespace ImageNameConverter
                 }
                 else
                 {
-                    //Screenshot umbennen
-                    newDateien[i] = Dateien[i].Insert(Dateien[i].LastIndexOf('\\'),"\\umbennant");
+                    string oldName = Dateien[i].Replace(filePath, "");
+
+                    string newName = oldName.Replace("Screenshot_", "").Replace("-", " ");
+
+                    newDateien[i] = filePath + "umbennant\\" + newName;
                 }
             }
 
@@ -205,7 +244,7 @@ namespace ImageNameConverter
             {
                 try
                 {
-                    for (int i = 0; i < files.Length; i++)
+                    for (int i = 0; i < files.Count; i++)
                     {
                         File.Copy(files[i], (string)lstNew.Items[i]);
                         PrbUmbennen.Value++;
@@ -221,7 +260,7 @@ namespace ImageNameConverter
                 {
                     const string messageDone = "Unbekannter Fehler ist aufgetretten!!";
                     const string captionDone = "Help!?!";
-                    MessageBox.Show(messageDone, captionDone, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                    MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
