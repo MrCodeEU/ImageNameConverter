@@ -122,11 +122,11 @@ namespace ImageNameConverter
 
         private List<string> Umbennen(List<string> Dateien)
         {
-            List<string> newDateien = new List<string>();
+            List<string> newDateien = new List<string>(Dateien);
 
             for (int i = 0; i < Dateien.Count; i++)
             {
-                FileType filetype = FileTypeDetector.DetectFileType("__Stream___!!!!");
+                FileType filetype = FileTypeDetector.DetectFileType(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
                 switch (filetype)
                 {
                     case FileType.Bmp:
@@ -134,88 +134,100 @@ namespace ImageNameConverter
                     case FileType.Jpeg:
                     case FileType.Nef:
                     case FileType.Png:
-
-                        break;
-
-                    case FileType.QuickTime:
-
-                        break;
-
-                    default:
-                        string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateiendung wurde nicht erkannt oder ist nicht unterstützt!\nDatei wird übersprungen";
-                        string captionDone = "Unbekannter Dateifehler!";
-                        MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        newDateien.RemoveAt(i);
-                        break;
-                }
-
-
-
-                if (!Dateien[i].Contains("Screenshot"))
-                {
-                    if (Dateien[i].ToLower().Contains("mov"))
-                    {
-                        var directories = QuickTimeMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
-                        // obtain the Exif SubIFD directory
-                        var directory = directories.OfType<QuickTimeMetadataHeaderDirectory>().FirstOrDefault();
-                        // query the tag's value
-                        if (directory.TryGetDateTime(QuickTimeMetadataHeaderDirectory.TagCreationDate, out var dateTime))
+                        if (Dateien[i].ToLower().Contains("screenshot"))
                         {
-
-                            //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
-
-                            //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
-                            newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
+                            string oldName = Dateien[i].Replace(filePath, "");
+                            string newName = oldName.ToLower().Replace("screenshot_", "").Replace("-", " ");
+                            newDateien[i] = filePath + "umbennant\\" + newName;
                         }
                         else
                         {
-                            //Kann Datei nicht umbennen, da sie kein Aufnahmnedatum in EXIF gespeichert hat
-                            newDateien[i] = Dateien[i].Insert(Dateien[i].LastIndexOf('\\'), "\\umbennant");
+                            var directories = ImageMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
+
+                            // obtain the Exif SubIFD directory
+                            var directory = new ExifSubIfdDirectory();
+                            try
+                            {
+                                directory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+                            }
+                            catch (Exception)
+                            {
+                                string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Schwerwiegender Fehler aufgetretten!";
+                                string captionDone = "Unbekannter Dateifehler!";
+                                MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                newDateien.RemoveAt(i);
+                                i--;
+                                return new List<string>();
+                            }
+
+                            if (directory == null)
+                            {
+                                string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Diese Datei wird übersprungen!";
+                                string captionDone = "Unbekannter Dateifehler!";
+                                MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                newDateien.RemoveAt(i);
+                                i--;
+                                break;
+                            }
+                            // query the tag's value
+                            if (directory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
+                            {
+
+                                //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
+
+                                //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
+                                newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + filetype.ToString();
+                            }
+                            else
+                            {
+                                string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateie hat kein Aufnahmedatum!\nDatei wird übersprungen";
+                                string captionDone = "Unbekannter Dateifehler!";
+                                MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                newDateien.RemoveAt(i);
+                                i--;
+                            }
                         }
-                    }
-                    else
-                    {
-                        var directories = ImageMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
+                        break;
+
+                    case FileType.QuickTime:
+                        var directoriesQuick = QuickTimeMetadataReader.ReadMetadata(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
                         // obtain the Exif SubIFD directory
-                        var directory = new ExifSubIfdDirectory();
-                        try
-                        {
-                            directory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
-                        }
-                        catch (Exception)
+                        var directoryQuick = directoriesQuick.OfType<QuickTimeMetadataHeaderDirectory>().FirstOrDefault();
+
+                        if (directoryQuick == null)
                         {
                             string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Diese Datei wird übersprungen!";
                             string captionDone = "Unbekannter Dateifehler!";
                             MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             newDateien.RemoveAt(i);
+                            i--;
                             break;
                         }
+
                         // query the tag's value
-                        if (directory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
+                        if (directoryQuick.TryGetDateTime(QuickTimeMetadataHeaderDirectory.TagCreationDate, out var dateTimeQuick))
                         {
 
                             //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
 
                             //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
-                            newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + "PLATZHALTER";
+                            newDateien[i] = filePath + "umbennant\\" + dateTimeQuick.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
                         }
                         else
                         {
-                            //Kann Datei nicht umbennen, da sie kein Aufnahmnedatum in EXIF gespeichert hat
-                            newDateien[i] = Dateien[i].Insert(Dateien[i].LastIndexOf('\\'), "\\umbennant");
+                            string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateie hat kein Aufnahmedatum!\nDatei wird übersprungen";
+                            string captionDone = "Unbekannter Dateifehler!";
+                            MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            newDateien.RemoveAt(i);
+                            i--;
                         }
-                    }
-                }
-                else
-                {
-                    string oldName = Dateien[i].Replace(filePath, "");
-
-                    string newName = oldName.Replace("Screenshot_", "").Replace("-", " ");
-
-                    newDateien[i] = filePath + "umbennant\\" + newName;
+                        break;
+                    default:
+                        MessageBox.Show(newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateiendung wurde nicht erkannt oder ist nicht unterstützt!\nDatei wird übersprungen", "Unbekannter Dateifehler!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        newDateien.RemoveAt(i);
+                        break;
                 }
             }
-
             return newDateien;
         }
 
