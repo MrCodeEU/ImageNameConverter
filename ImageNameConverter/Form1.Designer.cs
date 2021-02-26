@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.btnOpenFile = new System.Windows.Forms.Button();
-            this.btnOpenFolder = new System.Windows.Forms.Button();
             this.btnRename = new System.Windows.Forms.Button();
             this.lstOld = new System.Windows.Forms.ListBox();
             this.lstNew = new System.Windows.Forms.ListBox();
@@ -43,29 +43,22 @@
             // 
             // btnOpenFile
             // 
-            this.btnOpenFile.Location = new System.Drawing.Point(12, 12);
+            this.btnOpenFile.Location = new System.Drawing.Point(16, 15);
+            this.btnOpenFile.Margin = new System.Windows.Forms.Padding(4);
             this.btnOpenFile.Name = "btnOpenFile";
-            this.btnOpenFile.Size = new System.Drawing.Size(91, 23);
+            this.btnOpenFile.Size = new System.Drawing.Size(121, 28);
             this.btnOpenFile.TabIndex = 0;
             this.btnOpenFile.Text = "Dateien öffnen";
             this.btnOpenFile.UseVisualStyleBackColor = true;
             this.btnOpenFile.Click += new System.EventHandler(this.BtnOpenFile_Click);
             // 
-            // btnOpenFolder
-            // 
-            this.btnOpenFolder.Location = new System.Drawing.Point(109, 12);
-            this.btnOpenFolder.Name = "btnOpenFolder";
-            this.btnOpenFolder.Size = new System.Drawing.Size(91, 23);
-            this.btnOpenFolder.TabIndex = 1;
-            this.btnOpenFolder.Text = "Ordner öffnen";
-            this.btnOpenFolder.UseVisualStyleBackColor = true;
-            // 
             // btnRename
             // 
             this.btnRename.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRename.Location = new System.Drawing.Point(641, 298);
+            this.btnRename.Location = new System.Drawing.Point(855, 367);
+            this.btnRename.Margin = new System.Windows.Forms.Padding(4);
             this.btnRename.Name = "btnRename";
-            this.btnRename.Size = new System.Drawing.Size(75, 23);
+            this.btnRename.Size = new System.Drawing.Size(100, 28);
             this.btnRename.TabIndex = 2;
             this.btnRename.Text = "Umbennen";
             this.btnRename.UseVisualStyleBackColor = true;
@@ -76,9 +69,11 @@
             this.lstOld.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.lstOld.FormattingEnabled = true;
-            this.lstOld.Location = new System.Drawing.Point(12, 41);
+            this.lstOld.ItemHeight = 16;
+            this.lstOld.Location = new System.Drawing.Point(16, 50);
+            this.lstOld.Margin = new System.Windows.Forms.Padding(4);
             this.lstOld.Name = "lstOld";
-            this.lstOld.Size = new System.Drawing.Size(490, 147);
+            this.lstOld.Size = new System.Drawing.Size(652, 180);
             this.lstOld.TabIndex = 3;
             this.lstOld.SelectedIndexChanged += new System.EventHandler(this.LstOld_SelectedIndexChanged);
             // 
@@ -87,9 +82,11 @@
             this.lstNew.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.lstNew.FormattingEnabled = true;
-            this.lstNew.Location = new System.Drawing.Point(12, 203);
+            this.lstNew.ItemHeight = 16;
+            this.lstNew.Location = new System.Drawing.Point(16, 250);
+            this.lstNew.Margin = new System.Windows.Forms.Padding(4);
             this.lstNew.Name = "lstNew";
-            this.lstNew.Size = new System.Drawing.Size(490, 147);
+            this.lstNew.Size = new System.Drawing.Size(652, 180);
             this.lstNew.TabIndex = 4;
             this.lstNew.SelectedIndexChanged += new System.EventHandler(this.LstNew_SelectedIndexChanged);
             // 
@@ -100,43 +97,47 @@
             // picSelected
             // 
             this.picSelected.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.picSelected.Location = new System.Drawing.Point(508, 12);
+            this.picSelected.Location = new System.Drawing.Point(677, 15);
+            this.picSelected.Margin = new System.Windows.Forms.Padding(4);
             this.picSelected.Name = "picSelected";
-            this.picSelected.Size = new System.Drawing.Size(208, 156);
+            this.picSelected.Size = new System.Drawing.Size(277, 192);
             this.picSelected.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picSelected.TabIndex = 5;
             this.picSelected.TabStop = false;
             // 
             // PrbUmbennen
             // 
-            this.PrbUmbennen.Location = new System.Drawing.Point(508, 327);
+            this.PrbUmbennen.Location = new System.Drawing.Point(677, 402);
+            this.PrbUmbennen.Margin = new System.Windows.Forms.Padding(4);
             this.PrbUmbennen.Name = "PrbUmbennen";
-            this.PrbUmbennen.Size = new System.Drawing.Size(208, 23);
+            this.PrbUmbennen.Size = new System.Drawing.Size(277, 28);
             this.PrbUmbennen.TabIndex = 6;
             // 
             // LblProgress
             // 
             this.LblProgress.AutoSize = true;
-            this.LblProgress.Location = new System.Drawing.Point(508, 303);
+            this.LblProgress.Location = new System.Drawing.Point(677, 373);
+            this.LblProgress.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.LblProgress.Name = "LblProgress";
-            this.LblProgress.Size = new System.Drawing.Size(53, 13);
+            this.LblProgress.Size = new System.Drawing.Size(71, 17);
             this.LblProgress.TabIndex = 7;
             this.LblProgress.Text = "Fortschritt";
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(728, 362);
+            this.ClientSize = new System.Drawing.Size(971, 446);
             this.Controls.Add(this.LblProgress);
             this.Controls.Add(this.PrbUmbennen);
             this.Controls.Add(this.picSelected);
             this.Controls.Add(this.lstNew);
             this.Controls.Add(this.lstOld);
             this.Controls.Add(this.btnRename);
-            this.Controls.Add(this.btnOpenFolder);
             this.Controls.Add(this.btnOpenFile);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Bilddateienname Umwandler by MrCode";
@@ -149,7 +150,6 @@
         #endregion
 
         private System.Windows.Forms.Button btnOpenFile;
-        private System.Windows.Forms.Button btnOpenFolder;
         private System.Windows.Forms.Button btnRename;
         private System.Windows.Forms.ListBox lstOld;
         private System.Windows.Forms.ListBox lstNew;
