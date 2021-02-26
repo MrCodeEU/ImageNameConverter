@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using MetadataExtractor;
+﻿using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using MetadataExtractor.Formats.QuickTime;
 using MetadataExtractor.Util;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace ImageNameConverter
 {
     public partial class Form1 : Form
     {
-        string filePath = string.Empty;
-        List<string> files = new List<string>();
+        private string filePath = string.Empty;
+        private List<string> files = new List<string>();
 
         public Form1()
         {
@@ -124,6 +122,7 @@ namespace ImageNameConverter
         {
             List<string> newDateien = new List<string>(Dateien);
 
+            //alle Dateien umbennen (Fehlt noch für Whatsapp)
             for (int i = 0; i < Dateien.Count; i++)
             {
                 FileType filetype = FileTypeDetector.DetectFileType(new FileStream(Dateien[i], FileMode.Open, FileAccess.Read));
@@ -138,7 +137,16 @@ namespace ImageNameConverter
                         {
                             string oldName = Dateien[i].Replace(filePath, "");
                             string newName = oldName.ToLower().Replace("screenshot_", "").Replace("-", " ");
-                            newDateien[i] = filePath + "umbennant\\" + newName;
+                            newName = newName.Remove(newName.IndexOf("."), 4);
+                            newDateien[i] = filePath + "umbennant\\" + newName + "." + filetype.ToString();
+                        }
+                        else if(Dateien[i].ToLower().Contains("-wa"))
+                        {
+                            string oldName = Dateien[i].Replace(filePath, "");
+                            string newName = oldName.ToLower().Replace("img-", "");
+                            newName = newName.Remove(newName.IndexOf("-"), newName.Length - newName.IndexOf("-"));
+                            newName += " 000000";
+                            newDateien[i] = filePath + "umbennant\\" + newName + "." + filetype.ToString();
                         }
                         else
                         {
@@ -173,9 +181,6 @@ namespace ImageNameConverter
                             if (directory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
                             {
 
-                                //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
-
-                                //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
                                 newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + filetype.ToString();
                             }
                             else
@@ -228,6 +233,24 @@ namespace ImageNameConverter
                         break;
                 }
             }
+
+            //alle Dateien auf Doppelbennenungen überprüfen
+            for (int i = 0; i < newDateien.Count; i++)
+            {
+                int DuplikatCounter = 0;
+                
+                //Create helper list for replacement!!
+
+                for (int j = 0; j < newDateien.Count; j++)
+                {
+                    if (newDateien[i] == newDateien[j] && i!=j && !newDateien[i].Contains("("))
+                    {
+                        DuplikatCounter++;
+                        newDateien[j] = newDateien[i].Insert(newDateien[i].IndexOf("."), " (" + DuplikatCounter.ToString() + ")");
+                    }
+                }
+            }
+
             return newDateien;
         }
 
