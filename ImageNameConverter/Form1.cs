@@ -140,6 +140,7 @@ namespace ImageNameConverter
         private List<string> Umbennen(List<string> Dateien)
         {
             List<string> newDateien = new List<string>(Dateien);
+            List<string> errorList = new List<string>();
 
             //alle Dateien umbennen (Fehlt noch für Whatsapp)
             for (int i = 0; i < Dateien.Count; i++)
@@ -179,36 +180,26 @@ namespace ImageNameConverter
                             }
                             catch (Exception)
                             {
-                                string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Schwerwiegender Fehler aufgetretten!";
-                                string captionDone = "Unbekannter Dateifehler!";
-                                MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                newDateien.RemoveAt(i);
-                                i--;
+                                newDateien[i] = filePath + "umbennant\\" + Dateien[i].Replace(filePath, "");
                                 return new List<string>();
                             }
 
                             if (directory == null)
                             {
-                                string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Diese Datei wird übersprungen!";
-                                string captionDone = "Unbekannter Dateifehler!";
-                                MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                newDateien.RemoveAt(i);
-                                i--;
+                                newDateien[i] = Dateien[i];
+                                newDateien[i] = filePath + "umbennant\\" + Dateien[i].Replace(filePath, "");
+                                errorList.Add("• Unbekannter Fehler: " + Dateien[i]);
                                 break;
                             }
                             // query the tag's value
                             if (directory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
                             {
-
                                 newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + filetype.ToString();
                             }
                             else
                             {
-                                string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateie hat kein Aufnahmedatum!\nDatei wird übersprungen";
-                                string captionDone = "Unbekannter Dateifehler!";
-                                MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                newDateien.RemoveAt(i);
-                                i--;
+                                newDateien[i] = filePath + "umbennant\\" + Dateien[i].Replace(filePath,"");
+                                errorList.Add("• Kein Aufnahmedatum: " + Dateien[i]);
                             }
                         }
                         break;
@@ -220,35 +211,26 @@ namespace ImageNameConverter
 
                         if (directoryQuick == null)
                         {
-                            string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Diese Datei wird übersprungen!";
-                            string captionDone = "Unbekannter Dateifehler!";
-                            MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            newDateien.RemoveAt(i);
-                            i--;
+                            newDateien[i] = filePath + "umbennant\\" + Dateien[i].Replace(filePath, "");
+                            errorList.Add("• Unbekannter Fehler: " + Dateien[i]);
                             break;
                         }
 
                         // query the tag's value
                         if (directoryQuick.TryGetDateTime(QuickTimeMetadataHeaderDirectory.TagCreationDate, out var dateTimeQuick))
                         {
-
-                            //string dateTaken = r.Replace(Encoding.UTF8.GetString(dateTime), "-", 2);
-
                             //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
                             newDateien[i] = filePath + "umbennant\\" + dateTimeQuick.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
                         }
                         else
                         {
-                            string messageDone = newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateie hat kein Aufnahmedatum!\nDatei wird übersprungen";
-                            string captionDone = "Unbekannter Dateifehler!";
-                            MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            newDateien.RemoveAt(i);
-                            i--;
+                            newDateien[i] = filePath + "umbennant\\" + Dateien[i].Replace(filePath, "");
+                            errorList.Add("• Kein Aufnahmedatum: " + Dateien[i]);
                         }
                         break;
                     default:
-                        MessageBox.Show(newDateien[i] + " konnte nicht verarbeitet werden.\n Die Dateiendung wurde nicht erkannt oder ist nicht unterstützt!\nDatei wird übersprungen", "Unbekannter Dateifehler!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        newDateien.RemoveAt(i);
+                        newDateien[i] = filePath + "umbennant\\" + Dateien[i].Replace(filePath, "");
+                        errorList.Add("• Unbekannter Fehler: " + Dateien[i]);
                         break;
                 }
             }
@@ -269,6 +251,16 @@ namespace ImageNameConverter
                     }
                 }
             }
+
+            string messageDone = "Folgende Dateien konnten nicht umbenannt werden:\n";
+            string captionDone = "Nichtkonvertierbare Dateien";
+
+            for (int i = 0; i < errorList.Count; i++)
+            {
+                messageDone += errorList[i].Replace(filePath, "") + "\n";
+            }
+
+            MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             return newDateien;
         }
@@ -316,7 +308,7 @@ namespace ImageNameConverter
 
                     const string messageDone = "Alle Dateien wurden umbennant. \n Die Dateien befinden sich in einem neuen Unterordner mit dem Namen \"umbennant\".";
                     const string captionDone = "Dateien umbennen erfolgreich";
-                    MessageBox.Show(messageDone, captionDone, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     //Clear everything
 
                 }
