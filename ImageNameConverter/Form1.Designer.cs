@@ -140,7 +140,7 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "Bilddateienname Umwandler by MrCode";
+            this.Text = "Bilddateienname Umwandler by MrCode v1.0.2";
             ((System.ComponentModel.ISupportInitialize)(this.picSelected)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -158,7 +158,7 @@ namespace ImageNameConverter
                             string oldName = Dateien[i].Replace(filePath, "");
                             string newName = oldName.ToLower().Replace("screenshot_", "").Replace("-", " ");
                             newName = newName.Remove(newName.IndexOf("."), 4);
-                            newDateien[i] = filePath + "umbennant\\" + newName + "." + filetype.ToString();
+                            newDateien[i] = filePath + "umbennant\\" + newName + "." + filetype.ToString().ToLower();
                         }
                         else if(Dateien[i].ToLower().Contains("-wa"))
                         {
@@ -166,7 +166,7 @@ namespace ImageNameConverter
                             string newName = oldName.ToLower().Replace("img-", "");
                             newName = newName.Remove(newName.IndexOf("-"), newName.Length - newName.IndexOf("-"));
                             newName += " 000000";
-                            newDateien[i] = filePath + "umbennant\\" + newName + "." + filetype.ToString();
+                            newDateien[i] = filePath + "umbennant\\" + newName + "." + filetype.ToString().ToLower();
                         }
                         else
                         {
@@ -194,7 +194,7 @@ namespace ImageNameConverter
                             // query the tag's value
                             if (directory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
                             {
-                                newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + filetype.ToString();
+                                newDateien[i] = filePath + "umbennant\\" + dateTime.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + filetype.ToString().ToLower();
                             }
                             else
                             {
@@ -252,15 +252,17 @@ namespace ImageNameConverter
                 }
             }
 
-            string messageDone = "Folgende Dateien konnten nicht umbenannt werden:\n";
-            string captionDone = "Nichtkonvertierbare Dateien";
-
-            for (int i = 0; i < errorList.Count; i++)
+            if (errorList.Count > 0)
             {
-                messageDone += errorList[i].Replace(filePath, "") + "\n";
-            }
+                string messageDone = "Folgende Dateien konnten nicht umbenannt werden:\n";
+                string captionDone = "Nichtkonvertierbare Dateien";
 
-            MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                for (int i = 0; i < errorList.Count; i++)
+                {
+                    messageDone += errorList[i].Replace(filePath, "") + "\n";
+                }
+                MessageBox.Show(messageDone, captionDone, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
             return newDateien;
         }
