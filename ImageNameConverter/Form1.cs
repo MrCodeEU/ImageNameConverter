@@ -220,7 +220,7 @@ namespace ImageNameConverter
                         if (directoryQuick.TryGetDateTime(QuickTimeMetadataHeaderDirectory.TagCreationDate, out var dateTimeQuick))
                         {
                             //Convert Name captured.Year + "_" + captured.Month + "_" + captured.day + " " + captured.Hour + "-" + captured.Minute + "-" + captured.Second;
-                            newDateien[i] = filePath + "umbennant\\" + dateTimeQuick.ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
+                            newDateien[i] = filePath + "umbennant\\" + dateTimeQuick.AddHours(1).ToString("s").Replace("-", "").Replace("T", " ").Replace(":", "") + "." + Dateien[i].Split('.')[1];
                         }
                         else
                         {
